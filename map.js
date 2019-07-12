@@ -5,9 +5,20 @@ const padding = 50;
 const COUNTIES_FILE = "https://raw.githubusercontent.com/no-stack-dub-sack/testable-projects-fcc/master/src/data/choropleth_map/counties.json";
 const EDUCATION_FILE = "https://raw.githubusercontent.com/no-stack-dub-sack/testable-projects-fcc/master/src/data/choropleth_map/for_user_education.json";
 
-const svg = d3.select("#chart").append("svg").attr("id", "map").attr("width", w + padding).attr("height", h + padding).append("g");
-const tooltip = d3.select("body").append("div").attr("id", "tooltip").attr("data-education", "");
-const legend = d3.select("#map").append("g").attr("id", "legend");
+const svg = d3.select("#chart")
+                .append("svg")
+                .attr("id", "map")
+                .attr("width", w + padding)
+                .attr("height", h + padding);
+
+const tooltip = d3.select("body")
+                .append("div")
+                .attr("id", "tooltip")
+                .attr("data-education", "");
+
+const legend = d3.select("#map")
+                .append("g")
+                .attr("id", "legend");
 
 // load data
 d3.queue()
@@ -18,10 +29,12 @@ d3.queue()
 const path = d3.geoPath();
 
 const legendScale = d3.scaleLinear()
-                        .domain([60, 0])
+                        .domain([50, 0])
                         .range([0, 200]);
 
 const legendAxis = d3.axisRight(legendScale);
+
+
 
 // ready callback
 function ready(error, countyData, educationData) {
@@ -53,7 +66,7 @@ function ready(error, countyData, educationData) {
         .on("mouseover", function(d) {
             let countyinfo = education.filter(item => item.fips === d.id);
 
-            d3.select(this).style("stroke", "white")
+            d3.select(this).style("stroke", "hotpink")
             d3.select("#tooltip")
                 .style("top", d3.event.pageY + 5 + "px")
                 .style("left", d3.event.pageX + 5 + "px")
@@ -70,17 +83,27 @@ function ready(error, countyData, educationData) {
         })
 
         legend
-            .attr("transform", "translate(1000, 300)")
-            .call(legendAxis.ticks(6)) //legend
+            .attr("transform", "translate(950, 300)")
+            .call(legendAxis.ticks(6).tickFormat(d => d + "%")) 
+            .selectAll(".legend-block")
+            .data([0, 10, 20, 30, 40, 50])
+            .enter()
+            .append("rect")
+            .attr("class", "legend-block")
+            .attr("width", 20)
+            .attr("height", 40)
+            .attr("fill", d => setColor(d))
+            .attr("y", d => legendScale(d) - 39)
+            .attr("x", -15)
             
 
 }
 
 function setColor(num) {
-    let hue = 338; 
+    let hue = 260; 
 
     if (num >= 50) {
-        return "hsl(" + hue + ",100%, 40%)";
+        return "hsl(" + hue + ",100%, 20%)";
     } else if (num >= 40) {
         return "hsl(" + hue + ",100%, 50%)";
     } else if (num >= 30) {
