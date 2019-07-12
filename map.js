@@ -1,34 +1,87 @@
+const h = 600;
+const w = 1024;
+const padding = 50;
 
-// education data
-const educationData = d3.map();
+const COUNTIES_FILE = "https://raw.githubusercontent.com/no-stack-dub-sack/testable-projects-fcc/master/src/data/choropleth_map/counties.json";
+const EDUCATION_FILE = "https://raw.githubusercontent.com/no-stack-dub-sack/testable-projects-fcc/master/src/data/choropleth_map/for_user_education.json";
+
+const svg = d3.select("#chart").append("svg").attr("id", "map").attr("width", w + padding).attr("height", h + padding);
+const tooltip = d3.select("body").append("div").attr("id", "tooltip").attr("data-education", "");
 
 // load data
 d3.queue()
-    .defer(d3.json, "./data/counties.json")
-    .defer(d3.json, "./data/for_user_education.json")
+    .defer(d3.json, COUNTIES_FILE)
+    .defer(d3.json, EDUCATION_FILE)
     .await(ready);
 
-// callback
-function ready(error, data) {
+const path = d3.geoPath();
 
-    console.log(data.objects.counties.geometries);
-    if(error) throw error;
+// ready callback
+function ready(error, countyData, educationData) {
 
-    const counties = topojson.feature(data, {
-        type: "GeometryCollection",
-        geometries: data.objects.counties.geometries
-    });
+    if(error) {throw error};
 
-    const projection = d3.geoAlbersUsa()
-        .fitExtent([[20,20], [1024, 768]], counties);
+    const counties = topojson.feature(countyData, countyData.objects.counties).features 
+    const education = educationData;
 
-    const geoPath = d3.geoPath()
-        .projection(projection);
-
-    d3.select("#canvas").selectAll("path")
+    svg //map
+        .selectAll(".county")
         .data(counties)
         .enter()
         .append("path")
-        .attr("d", geoPath)
-        .style("fill", "red")
+        .attr("class", "county")
+        .attr("d", path)
+        .attr("data-fips",(d) => d.id)
+        .attr("data-education", function(d) {
+            let ed = education.filter(item => item.fips === d.id);
+            if (ed[0]) {
+                return ed[0].bachelorsOrHigher;
+            } else {
+                return 0;
+            }})
+        .style("fill", function(d) {
+            let countyinfo = education.filter(item => item.fips === d.id);
+            return setColor(countyinfo[0].bachelorsOrHigher);
+            })
+        .on("mouseover", function(d) {
+            let countyinfo = education.filter(item => item.fips === d.id);
+
+            d3.select(this).style("stroke", "white")
+            d3.select("#tooltip")
+                .style("top", d3.event.pageY + 5 + "px")
+                .style("left", d3.event.pageX + 5 + "px")
+                .attr("data-education", countyinfo[0].bachelorsOrHigher)
+                .style("opacity", .9)
+                .html("<p>" + countyinfo[0].area_name + ", " + countyinfo[0].state + "<br />Attainment: " + countyinfo[0].bachelorsOrHigher + "&#37;</p>");
+        })
+        .on("mouseout", function(d) {
+            d3.select(this).style("stroke", "none");
+            d3.select("#tooltip")
+                .style("top", "-100px")
+                .style("left", "-100px")
+                .style("opacity", 0);
+        })
+
+        svg //legend
+
 }
+
+function setColor(num) {
+    let hue = 338; 
+
+    if (num >= 50) {
+        return "hsl(" + hue + ",100%, 40%)";
+    } else if (num >= 40) {
+        return "hsl(" + hue + ",100%, 50%)";
+    } else if (num >= 30) {
+        return "hsl(" + hue + ",100%, 60%)"
+    } else if (num >= 20) {
+        return "hsl(" + hue + ",100%, 70%)"
+    } else if (num >= 10) {
+        return "hsl(" + hue + ",100%, 80%)"
+    }else {
+        return "hsl(" + hue + ",100%, 90%)"
+    }
+}
+
+
