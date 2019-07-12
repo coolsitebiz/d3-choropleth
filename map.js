@@ -5,9 +5,9 @@ const padding = 50;
 const COUNTIES_FILE = "https://raw.githubusercontent.com/no-stack-dub-sack/testable-projects-fcc/master/src/data/choropleth_map/counties.json";
 const EDUCATION_FILE = "https://raw.githubusercontent.com/no-stack-dub-sack/testable-projects-fcc/master/src/data/choropleth_map/for_user_education.json";
 
-const svg = d3.select("#chart").append("svg").attr("id", "map").attr("width", w + padding).attr("height", h + padding);
+const svg = d3.select("#chart").append("svg").attr("id", "map").attr("width", w + padding).attr("height", h + padding).append("g");
 const tooltip = d3.select("body").append("div").attr("id", "tooltip").attr("data-education", "");
-const legend = svg.append("g").attr("id", "legend");
+const legend = d3.select("#map").append("g").attr("id", "legend");
 
 // load data
 d3.queue()
@@ -16,6 +16,12 @@ d3.queue()
     .await(ready);
 
 const path = d3.geoPath();
+
+const legendScale = d3.scaleLinear()
+                        .domain([60, 0])
+                        .range([0, 200]);
+
+const legendAxis = d3.axisRight(legendScale);
 
 // ready callback
 function ready(error, countyData, educationData) {
@@ -63,7 +69,10 @@ function ready(error, countyData, educationData) {
                 .style("opacity", 0);
         })
 
-        //legend //legend
+        legend
+            .attr("transform", "translate(1000, 300)")
+            .call(legendAxis.ticks(6)) //legend
+            
 
 }
 
