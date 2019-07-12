@@ -93,8 +93,8 @@ function ready(error, countyData, educationData) {
             .attr("width", 20)
             .attr("height", 40)
             .attr("fill", d => setColor(d))
-            .attr("y", d => legendScale(d) - 39)
-            .attr("x", -15)
+            .attr("y", d => legendScale(d) - 35)
+            .attr("x", -14)
             
 
 }
