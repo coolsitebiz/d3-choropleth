@@ -7,6 +7,7 @@ const EDUCATION_FILE = "https://raw.githubusercontent.com/no-stack-dub-sack/test
 
 const svg = d3.select("#chart").append("svg").attr("id", "map").attr("width", w + padding).attr("height", h + padding);
 const tooltip = d3.select("body").append("div").attr("id", "tooltip").attr("data-education", "");
+const legend = svg.append("g").attr("id", "legend");
 
 // load data
 d3.queue()
@@ -62,7 +63,7 @@ function ready(error, countyData, educationData) {
                 .style("opacity", 0);
         })
 
-        svg //legend
+        //legend //legend
 
 }
 
